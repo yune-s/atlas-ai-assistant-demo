@@ -1,0 +1,17 @@
+{
+  "centerName": "Atlas Digital Academy",
+  "city": "Casablanca",
+  "courses": [
+    "Python for Beginners",
+    "Web Development",
+    "Digital Marketing",
+    "Excel for Business",
+    "AI Tools for Students"
+  ],
+  "languages": ["French", "Arabic", "Darija"],
+  "location": "Maarif, Casablanca",
+  "openingHours": "Monday to Saturday, 9:00 to 18:00",
+  "registration": "Students can register using the online form or by visiting the center.",
+  "phone": "+212 6 00 00 00 00",
+  "prices": "Prices depend on the course. Please leave your phone number and our team will contact you."
+}

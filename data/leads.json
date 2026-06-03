@@ -1,0 +1,101 @@
+[
+  {
+    "fullName": "younes eljaouhari",
+    "phoneNumber": "+212708796768",
+    "course": "Digital Marketing",
+    "city": "OUARZAZATE",
+    "originalMessage": "شحال الثمن؟",
+    "id": "a3a091c1-d815-41b1-b4e5-92fb262fd932",
+    "createdAt": "2026-06-03T21:41:43.362Z"
+  },
+  {
+    "fullName": "younes eljaouhari",
+    "phoneNumber": "+212708796768",
+    "course": "AI Tools for Students",
+    "city": "OUARZAZATE",
+    "originalMessage": "شحال الثمن؟",
+    "id": "970ca2f8-6497-41e4-b2d6-14944de5a451",
+    "createdAt": "2026-06-03T21:41:04.214Z"
+  },
+  {
+    "fullName": "younes eljaouhari",
+    "phoneNumber": "+212708796768",
+    "course": "Digital Marketing",
+    "city": "OUARZAZATE",
+    "originalMessage": "شحال الثمن؟",
+    "id": "88a27c98-7862-4d7d-ae46-081fc60285a4",
+    "createdAt": "2026-06-03T21:06:50.387Z"
+  },
+  {
+    "fullName": "younes eljaouhari",
+    "phoneNumber": "+212708796768",
+    "course": "Python for Beginners",
+    "city": "OUARZAZATE",
+    "originalMessage": "Comment s'inscrire ?",
+    "id": "601de493-706b-4700-90f8-c4359458ffed",
+    "createdAt": "2026-05-31T22:56:43.217Z"
+  },
+  {
+    "fullName": "YOUNES EL JAOUHARI",
+    "phoneNumber": "0710531588",
+    "course": "Web Development",
+    "city": "SIDI AYAD MIDELT",
+    "originalMessage": "شحال الثمن؟",
+    "id": "6e46d265-4493-484c-bc92-7ac43521d703",
+    "createdAt": "2026-05-31T19:58:18.021Z"
+  },
+  {
+    "fullName": "YOUNES EL JAOUHARI",
+    "phoneNumber": "0710531588",
+    "course": "Web Development",
+    "city": "SIDI AYAD MIDELT",
+    "originalMessage": "شحال الثمن؟",
+    "id": "6b6c07d0-1cfe-4781-8722-df78c49d9bb0",
+    "createdAt": "2026-05-31T19:42:50.882Z"
+  },
+  {
+    "fullName": "YOUNES EL JAOUHARI",
+    "phoneNumber": "0710531588",
+    "course": "Web Development",
+    "city": "SIDI AYAD MIDELT",
+    "originalMessage": "شحال الثمن؟",
+    "id": "4f2676d2-db80-4e13-8245-3cbb0bf41872",
+    "createdAt": "2026-05-31T18:45:04.738Z"
+  },
+  {
+    "fullName": "YOUNES EL JAOUHARI",
+    "phoneNumber": "0710531588",
+    "course": "Python for Beginners",
+    "city": "SIDI AYAD MIDELT",
+    "originalMessage": "شحال الثمن؟",
+    "id": "87f0b987-09dc-45ef-ae40-d426adbcac36",
+    "createdAt": "2026-05-31T18:42:53.952Z"
+  },
+  {
+    "fullName": "YOUNES EL JAOUHARI",
+    "phoneNumber": "0710531588",
+    "course": "Web Development",
+    "city": "SIDI AYAD MIDELT",
+    "originalMessage": "price",
+    "id": "e8adbc27-410d-4832-b715-348e7011cd68",
+    "createdAt": "2026-05-31T18:20:59.603Z"
+  },
+  {
+    "fullName": "YOUNES EL JAOUHARI",
+    "phoneNumber": "0710531588",
+    "course": "AI Tools for Students",
+    "city": "SIDI AYAD MIDELT",
+    "originalMessage": "شحال الثمن؟",
+    "id": "64cd5dc7-94db-4c77-9b75-51c7d35d333c",
+    "createdAt": "2026-05-31T14:19:43.313Z"
+  },
+  {
+    "fullName": "YOUNES EL JAOUHARI",
+    "phoneNumber": "0710531588",
+    "course": "Digital Marketing",
+    "city": "SIDI AYAD MIDELT",
+    "originalMessage": "prices",
+    "id": "0d8757ac-df6b-44b1-88c7-7acaf5fcd1d5",
+    "createdAt": "2026-05-31T13:58:38.589Z"
+  }
+]
