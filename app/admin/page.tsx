@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, BarChart3, Clock, GraduationCap, Sparkles, Users } from "lucide-react";
-import { isGoogleSheetsConfigured } from "@/lib/google-sheets";
-import { readLocalLeads } from "@/lib/lead-storage";
+import { getAdminLeads } from "@/lib/admin-leads";
 import type { Lead } from "@/types/lead";
 
 export const dynamic = "force-dynamic";
@@ -17,26 +16,31 @@ function mostRequestedCourse(leads: Lead[]) {
 
 function formatDate(value?: string) {
   if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
   return new Intl.DateTimeFormat("fr-FR", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value));
+  }).format(date);
 }
 
 function formatDateShort(value?: string) {
   if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
   return new Intl.DateTimeFormat("fr-FR", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(new Date(value));
+  }).format(date);
 }
 
 export default async function AdminPage() {
-  const leads = await readLocalLeads();
+  const { leads, source, error } = await getAdminLeads();
   const latestLead = leads[0];
-  const googleSheetsConfigured = isGoogleSheetsConfigured();
 
   const stats = [
     {
@@ -106,12 +110,27 @@ export default async function AdminPage() {
           </p>
         </div>
 
-        {googleSheetsConfigured && (
+        {source === "google-sheets" && !error && (
           <div className="mb-6 flex items-start gap-3 rounded-xl border border-atlas-green/30 bg-atlas-mint px-4 py-3 text-sm text-atlas-ink">
             <BarChart3 size={16} className="mt-0.5 shrink-0 text-atlas-green" aria-hidden="true" />
             <span>
               <strong>Google Sheets connecté.</strong> Les nouveaux leads sont synchronisés automatiquement.
             </span>
+          </div>
+        )}
+
+        {source === "local-json" && (
+          <div className="mb-6 flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+            <BarChart3 size={16} className="mt-0.5 shrink-0 text-atlas-green" aria-hidden="true" />
+            <span>
+              Google Sheets n'est pas configuré. Le tableau affiche les leads du fallback local.
+            </span>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error} Vérifiez les variables d'environnement Google Sheets et l'accès du service account.
           </div>
         )}
 
@@ -153,16 +172,22 @@ export default async function AdminPage() {
               <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-400">
                 <Users size={24} aria-hidden="true" />
               </div>
-              <p className="font-semibold text-slate-600">Aucun lead pour le moment</p>
-              <p className="mt-2 text-sm text-slate-400">
-                Testez le chatbot avec une question sur les prix ou l'inscription.
+              <p className="font-semibold text-slate-600">
+                {error ? "Leads indisponibles" : "Aucun lead pour le moment"}
               </p>
-              <Link
-                href="/chat"
-                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-atlas-green px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
-              >
-                Tester le chatbot
-              </Link>
+              <p className="mt-2 text-sm text-slate-400">
+                {error
+                  ? "Le tableau se réaffichera dès que la connexion Google Sheets sera rétablie."
+                  : "Testez le chatbot avec une question sur les prix ou l'inscription."}
+              </p>
+              {!error && (
+                <Link
+                  href="/chat"
+                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-atlas-green px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                >
+                  Tester le chatbot
+                </Link>
+              )}
             </div>
           ) : (
             <>
@@ -171,11 +196,12 @@ export default async function AdminPage() {
                 <table className="w-full border-collapse text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-400">
                     <tr>
-                      <th className="px-5 py-3 font-semibold">Nom</th>
-                      <th className="px-5 py-3 font-semibold">Téléphone</th>
-                      <th className="px-5 py-3 font-semibold">Formation</th>
-                      <th className="px-5 py-3 font-semibold">Ville</th>
-                      <th className="px-5 py-3 font-semibold">Date</th>
+                      <th className="px-5 py-3 font-semibold">Full name</th>
+                      <th className="px-5 py-3 font-semibold">Phone number</th>
+                      <th className="px-5 py-3 font-semibold">Course</th>
+                      <th className="px-5 py-3 font-semibold">City</th>
+                      <th className="px-5 py-3 font-semibold">Original message</th>
+                      <th className="px-5 py-3 font-semibold">Date/time</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -193,6 +219,9 @@ export default async function AdminPage() {
                           </span>
                         </td>
                         <td className="px-5 py-3.5 text-slate-600">{lead.city}</td>
+                        <td className="max-w-xs px-5 py-3.5 text-slate-600">
+                          {lead.originalMessage || "—"}
+                        </td>
                         <td className="px-5 py-3.5 text-slate-400 text-xs">
                           {formatDateShort(lead.createdAt)}
                         </td>
