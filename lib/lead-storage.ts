@@ -1,6 +1,8 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { sendLeadNotification } from "@/lib/email-notification";
 import { appendLeadToGoogleSheets, isGoogleSheetsConfigured } from "@/lib/google-sheets";
+import { buildLeadAutomation, normalizeLead } from "@/lib/lead-automation";
 import type { Lead, LeadInput, LeadStorageTarget } from "@/types/lead";
 
 const leadsFile = path.join(process.cwd(), "data", "leads.json");
@@ -21,7 +23,7 @@ export async function readLocalLeads(): Promise<Lead[]> {
   const raw = await fs.readFile(leadsFile, "utf8");
 
   try {
-    return JSON.parse(raw) as Lead[];
+    return (JSON.parse(raw) as Lead[]).map(normalizeLead);
   } catch {
     return [];
   }
@@ -37,8 +39,10 @@ export async function saveLead(input: LeadInput): Promise<{
   lead: Lead;
   storage: LeadStorageTarget;
 }> {
+  const automation = buildLeadAutomation(input);
   const lead: Lead = {
     ...input,
+    ...automation,
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
   };
@@ -47,6 +51,7 @@ export async function saveLead(input: LeadInput): Promise<{
   if (isGoogleSheetsConfigured()) {
     try {
       await appendLeadToGoogleSheets(lead);
+      await sendLeadNotification(lead);
       return { lead, storage: "google-sheets" };
     } catch (error) {
       console.error("Google Sheets save failed. Falling back to local JSON.", error);
@@ -54,5 +59,6 @@ export async function saveLead(input: LeadInput): Promise<{
   }
 
   await appendLeadToLocalJson(lead);
+  await sendLeadNotification(lead);
   return { lead, storage: "local-json" };
 }

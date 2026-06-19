@@ -11,6 +11,8 @@ A simple MVP chatbot demo for training centers in Morocco. It answers common stu
 - Lead collection form for pricing and registration requests
 - Google Sheets lead storage through an API route
 - Local JSON fallback lead storage
+- Automatic lead status, Hot/Warm/Cold priority, and owner notes
+- Optional email notification when SMTP variables are configured
 - Simple admin dashboard at `/admin`
 - OpenAI-powered replies when `OPENAI_API_KEY` is configured
 - Local deterministic replies when OpenAI is not configured
@@ -49,6 +51,20 @@ Optional:
 OPENAI_MODEL=gpt-4o-mini
 GOOGLE_SHEETS_SHEET_NAME=Leads
 ```
+
+Optional email notification:
+
+```bash
+EMAIL_NOTIFICATION_TO=owner@example.com
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=smtp_username
+SMTP_PASS=smtp_password
+SMTP_FROM=Atlas Digital Academy <smtp_username>
+SMTP_SECURE=false
+```
+
+Leave `EMAIL_NOTIFICATION_TO` or the SMTP variables empty to disable email notifications. The app will skip email silently and still save leads.
 
 ## Run Locally
 
@@ -89,6 +105,15 @@ Use the chat demo at `http://localhost:3000/chat` and verify:
 - Test I: `Do you teach cooking?` should fall back to a human advisor.
 - Test J: `Web Development` should return course information without immediately transferring to a human.
 
+## Lead Priority Tests
+
+Submit leads from the chat form and verify `/admin` or Google Sheets:
+
+- Hot: ask `prix`, `Comment s'inscrire ?`, or `شحال الثمن؟`, then submit a phone number and course. The lead should be `Status = New` and `Priority = Hot`.
+- Warm: submit a lead with a course selected but no clear pricing or registration intent, for example original message `I am interested in Web Development`. The lead should be `Priority = Warm`.
+- Cold: add a manual Google Sheets or local JSON row with no course and a general message. The current demo form asks for a course before saving, so Cold is mainly a fallback classification.
+- Notes: each lead should include a short follow-up note for the business owner.
+
 ## Google Sheets Setup
 
 1. Create a Google Sheet.
@@ -96,7 +121,7 @@ Use the chat demo at `http://localhost:3000/chat` and verify:
 3. Add headers in row 1:
 
 ```text
-Full name | Phone number | Course | City | Original message | Date/time
+Full name | Phone number | Course | City | Original message | Date/time | Status | Priority | Notes
 ```
 
 4. Create a Google Cloud project.
@@ -109,6 +134,8 @@ Full name | Phone number | Course | City | Original message | Date/time
 11. Copy the spreadsheet ID from the Google Sheet URL into `GOOGLE_SHEETS_SPREADSHEET_ID`.
 
 When these variables are missing, leads are saved locally in `data/leads.json`.
+
+Existing six-column Sheets still work, but adding the full nine columns is recommended before deploying to clients.
 
 ## Deploy to Vercel
 
@@ -150,5 +177,7 @@ data/
 lib/
   openai.ts                OpenAI prompt and fallback behavior
   google-sheets.ts         Google Sheets integration
+  lead-automation.ts       Lead status, priority, and notes rules
+  email-notification.ts    Optional SMTP email notification
   lead-storage.ts          Google Sheets/local JSON save logic
 ```

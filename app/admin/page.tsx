@@ -1,21 +1,36 @@
 import Link from "next/link";
-import { ArrowLeft, BarChart3, Clock, GraduationCap, Sparkles, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  BarChart3,
+  Clock,
+  Flame,
+  GraduationCap,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { getAdminLeads } from "@/lib/admin-leads";
-import type { Lead } from "@/types/lead";
+import type { Lead, LeadPriority } from "@/types/lead";
 
 export const dynamic = "force-dynamic";
 
+const priorityStyles: Record<LeadPriority, string> = {
+  Hot: "border-red-200 bg-red-50 text-red-700",
+  Warm: "border-amber-200 bg-amber-50 text-amber-700",
+  Cold: "border-slate-200 bg-slate-100 text-slate-600",
+};
+
 function mostRequestedCourse(leads: Lead[]) {
   const counts = leads.reduce<Record<string, number>>((acc, lead) => {
+    if (!lead.course) return acc;
     acc[lead.course] = (acc[lead.course] || 0) + 1;
     return acc;
   }, {});
   const [course] = Object.entries(counts).sort((a, b) => b[1] - a[1])[0] || [];
-  return course || "—";
+  return course || "-";
 }
 
 function formatDate(value?: string) {
-  if (!value) return "—";
+  if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
 
@@ -26,7 +41,7 @@ function formatDate(value?: string) {
 }
 
 function formatDateShort(value?: string) {
-  if (!value) return "—";
+  if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
 
@@ -38,9 +53,20 @@ function formatDateShort(value?: string) {
   }).format(date);
 }
 
+function PriorityBadge({ priority }: { priority: LeadPriority }) {
+  return (
+    <span
+      className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${priorityStyles[priority]}`}
+    >
+      {priority}
+    </span>
+  );
+}
+
 export default async function AdminPage() {
   const { leads, source, error } = await getAdminLeads();
   const latestLead = leads[0];
+  const hotLeads = leads.filter((lead) => lead.priority === "Hot").length;
 
   const stats = [
     {
@@ -49,6 +75,13 @@ export default async function AdminPage() {
       helper: "Contacts collectés par le chatbot",
       icon: Users,
       color: "bg-emerald-50 text-atlas-green",
+    },
+    {
+      label: "Hot leads",
+      value: hotLeads.toString(),
+      helper: "Demandes prix ou inscription à traiter vite",
+      icon: Flame,
+      color: "bg-red-50 text-red-600",
     },
     {
       label: "Dernier lead",
@@ -70,7 +103,6 @@ export default async function AdminPage() {
 
   return (
     <main className="min-h-screen bg-[#f7f8f6]">
-      {/* ── Header ── */}
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
           <div className="flex items-center gap-4">
@@ -99,14 +131,13 @@ export default async function AdminPage() {
       </header>
 
       <section className="mx-auto max-w-6xl px-5 py-10">
-        {/* ── Page title ── */}
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-widest text-atlas-green">
             Suivi en temps réel
           </p>
           <h1 className="mt-2 text-3xl font-extrabold text-atlas-ink">Leads collectés</h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600">
-            Contacts reçus via le chatbot : formation demandée, coordonnées et date de la demande.
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+            Retrouvez les demandes reçues via le chatbot avec leur statut, priorité et note de suivi.
           </p>
         </div>
 
@@ -134,8 +165,7 @@ export default async function AdminPage() {
           </div>
         )}
 
-        {/* ── Stat cards ── */}
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
@@ -158,7 +188,6 @@ export default async function AdminPage() {
           })}
         </div>
 
-        {/* ── Leads table ── */}
         <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
             <h2 className="font-bold text-atlas-ink">Liste des leads</h2>
@@ -191,9 +220,8 @@ export default async function AdminPage() {
             </div>
           ) : (
             <>
-              {/* Desktop table */}
               <div className="hidden overflow-x-auto md:block">
-                <table className="w-full border-collapse text-left text-sm">
+                <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-400">
                     <tr>
                       <th className="px-5 py-3 font-semibold">Full name</th>
@@ -202,6 +230,9 @@ export default async function AdminPage() {
                       <th className="px-5 py-3 font-semibold">City</th>
                       <th className="px-5 py-3 font-semibold">Original message</th>
                       <th className="px-5 py-3 font-semibold">Date/time</th>
+                      <th className="px-5 py-3 font-semibold">Status</th>
+                      <th className="px-5 py-3 font-semibold">Priority</th>
+                      <th className="px-5 py-3 font-semibold">Notes</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -220,10 +251,21 @@ export default async function AdminPage() {
                         </td>
                         <td className="px-5 py-3.5 text-slate-600">{lead.city}</td>
                         <td className="max-w-xs px-5 py-3.5 text-slate-600">
-                          {lead.originalMessage || "—"}
+                          {lead.originalMessage || "-"}
                         </td>
-                        <td className="px-5 py-3.5 text-slate-400 text-xs">
+                        <td className="px-5 py-3.5 text-xs text-slate-400">
                           {formatDateShort(lead.createdAt)}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                            {lead.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <PriorityBadge priority={lead.priority} />
+                        </td>
+                        <td className="max-w-sm px-5 py-3.5 text-slate-600">
+                          {lead.notes || "-"}
                         </td>
                       </tr>
                     ))}
@@ -231,7 +273,6 @@ export default async function AdminPage() {
                 </table>
               </div>
 
-              {/* Mobile cards */}
               <div className="divide-y divide-slate-100 md:hidden">
                 {leads.map((lead) => (
                   <div key={lead.id} className="px-4 py-4">
@@ -240,18 +281,26 @@ export default async function AdminPage() {
                         <p className="font-semibold text-atlas-ink">{lead.fullName}</p>
                         <p className="mt-0.5 font-mono text-sm text-slate-500">{lead.phoneNumber}</p>
                       </div>
-                      <span className="shrink-0 rounded-full bg-atlas-mint px-2.5 py-0.5 text-xs font-semibold text-atlas-green">
+                      <PriorityBadge priority={lead.priority} />
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                      <span className="rounded-full bg-atlas-mint px-2.5 py-0.5 font-semibold text-atlas-green">
                         {lead.course}
                       </span>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 font-semibold text-slate-600">
+                        {lead.status}
+                      </span>
+                      <span className="text-slate-400">{formatDateShort(lead.createdAt)}</span>
                     </div>
-                    <div className="mt-2 flex items-center gap-3 text-xs text-slate-400">
-                      <span>{lead.city}</span>
-                      <span>·</span>
-                      <span>{formatDateShort(lead.createdAt)}</span>
-                    </div>
+                    <p className="mt-2 text-xs text-slate-500">{lead.city}</p>
                     {lead.originalMessage && (
-                      <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-500 italic">
-                        &ldquo;{lead.originalMessage}&rdquo;
+                      <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-500">
+                        "{lead.originalMessage}"
+                      </p>
+                    )}
+                    {lead.notes && (
+                      <p className="mt-2 text-xs leading-relaxed text-slate-600">
+                        <span className="font-semibold text-slate-500">Notes:</span> {lead.notes}
                       </p>
                     )}
                   </div>
